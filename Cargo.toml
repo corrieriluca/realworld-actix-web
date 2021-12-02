@@ -1,0 +1,10 @@
+[package]
+name = "realworld-actix-web"
+version = "0.1.0"
+authors = [ "Luca Corrieri <luca.corrieri@epita.fr>" ]
+edition = "2021"
+readme = "./README.md"
+repository = "https://github.com/corrieriluca/realworld-actix-web"
+license-file = "./LICENSE"
+
+[dependencies]
