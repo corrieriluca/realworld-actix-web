@@ -1,17 +1,14 @@
-fn add(x: i32, y: i32) -> i32 {
-    x + y
-}
+use std::net::TcpListener;
 
-fn main() {
-    println!("1 + 2 = {}", add(1, 2));
-}
+use conduit::startup;
+use env_logger::Env;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
-    #[test]
-    fn add_two_numbers() {
-        assert_eq!(3, add(1, 2))
-    }
+    let listener = TcpListener::bind("127.0.0.1:8080")?;
+
+    startup::run(listener)?.await?;
+    Ok(())
 }
