@@ -42,7 +42,7 @@ jobs:
             ~/.cargo/git/db/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install Rust toolchain
+      - name: Install Rust toolchain (nightly)
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -77,11 +77,11 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v2
 
-      - name: Install Rust toolchain
+      - name: Install Rust toolchain (nightly)
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
           components: rustfmt
 
