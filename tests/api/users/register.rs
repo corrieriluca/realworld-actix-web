@@ -118,3 +118,38 @@ async fn register_with_valid_body_persists_in_database() {
     assert_none!(saved.bio);
     assert_none!(saved.image);
 }
+
+#[actix_rt::test]
+async fn register_with_already_used_username_or_email_should_return_500() {
+    // Arrange
+    let app = spawn_app().await;
+
+    // Act & Assert
+
+    // First insertion
+    let response = post_register_with_body(
+        &app.address,
+        r#"{"user":{"username":"jack","email":"jake@jake.com","password":"jack"}}"#,
+    )
+    .await;
+
+    assert_eq!(200, response.status().as_u16());
+
+    // Second insertion, slightly different but same username
+    let response = post_register_with_body(
+        &app.address,
+        r#"{"user":{"username":"jack","email":"user@domain.com","password":"different"}}"#,
+    )
+    .await;
+
+    assert_eq!(500, response.status().as_u16());
+
+    // Third insertion, slightly different but same email address
+    let response = post_register_with_body(
+        &app.address,
+        r#"{"user":{"username":"john","email":"jake@jake.com","password":"john"}}"#,
+    )
+    .await;
+
+    assert_eq!(500, response.status().as_u16());
+}
