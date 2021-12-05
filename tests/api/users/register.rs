@@ -1,19 +1,18 @@
 use crate::helpers::spawn_app;
 
 #[actix_rt::test]
-async fn health_check_works() {
+async fn register_with_no_body_should_return_400() {
     // Arrange
     let address = spawn_app();
     let client = reqwest::Client::new();
 
     // Act
     let response = client
-        .get(&format!("{}/api/health_check", address))
+        .post(&format!("{}/api/users", address))
         .send()
         .await
         .expect("Failed to execute request.");
 
     // Assert
-    assert_eq!(200, response.status().as_u16());
-    assert_eq!(Some(0), response.content_length());
+    assert_eq!(400, response.status().as_u16());
 }
