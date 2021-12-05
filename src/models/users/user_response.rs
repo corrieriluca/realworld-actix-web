@@ -20,6 +20,8 @@ struct UserResponseFields {
 }
 
 impl UserResponse {
+    /// Constructs a new [`UserResponse`] with the given values for the fields
+    /// of the [`UserResponseFields`] strcture.
     pub fn new(
         username: String,
         email: String,
