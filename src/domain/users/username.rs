@@ -34,7 +34,7 @@ impl AsRef<String> for Username {
 mod tests {
     use claim::{assert_err, assert_ok};
 
-    use crate::domain::users::username::Username;
+    use super::Username;
 
     #[test]
     fn an_empty_username_is_not_valid() {
