@@ -8,6 +8,3 @@ Thumbs.db
 
 # Rust
 /target
-
-# Conduit
-configuration.yml
