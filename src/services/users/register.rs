@@ -1,28 +1,25 @@
-use actix_web::{post, web};
-use serde::Deserialize;
+use actix_web::{post, web, Either, HttpResponse};
 
-use crate::models::users::UserResponse;
+use crate::{
+    domain::users::new_user::NewUser,
+    models::users::{UserRegistration, UserResponse},
+};
 
-#[derive(Deserialize)]
-struct UserRegistration {
-    user: UserRegistrationFields,
-}
-
-#[derive(Deserialize)]
-struct UserRegistrationFields {
-    username: String,
-    email: String,
-    password: String,
-}
+type RegisterResult = Either<web::Json<UserResponse>, HttpResponse>;
 
 /// The `POST /api/users` endpoint, used for user registration.
 #[post("")]
-async fn register(user: web::Json<UserRegistration>) -> web::Json<UserResponse> {
-    web::Json(UserResponse::new(
-        user.user.username.to_owned(),
-        user.user.email.to_owned(),
+async fn register(user: web::Json<UserRegistration>) -> RegisterResult {
+    let new_user: NewUser = match user.into_inner().try_into() {
+        Ok(new_user) => new_user,
+        Err(e) => return Either::Right(HttpResponse::BadRequest().body(e)),
+    };
+
+    Either::Left(web::Json(UserResponse::new(
+        new_user.username.as_ref().to_string(),
+        new_user.email.as_ref().to_string(),
         None,
         None,
         "token".into(),
-    ))
+    )))
 }
