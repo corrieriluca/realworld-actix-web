@@ -312,6 +312,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "claim"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f81099d6bb72e1df6d50bb2347224b666a670912bb7f06dbe867a4a070ab3ce8"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
 name = "const_fn"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1042,8 +1051,12 @@ version = "0.1.0"
 dependencies = [
  "actix-rt",
  "actix-web",
+ "claim",
  "env_logger",
+ "log",
  "reqwest",
+ "serde",
+ "serde_json",
  "tokio",
 ]
 
