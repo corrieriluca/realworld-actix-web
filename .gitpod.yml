@@ -6,3 +6,5 @@ vscode:
     - bungcip.better-toml
     - matklad.rust-analyzer
     - swellaby.vscode-rust-test-adapter
+    - hbenl.test-adapter-converter
+    - hbenl.vscode-test-explorer
