@@ -1,1 +1,8 @@
+image:
+  file: .gitpod.Dockerfile
 
+vscode:
+  extensions:
+    - bungcip.better-toml
+    - matklad.rust-analyzer
+    - swellaby.vscode-rust-test-adapter
