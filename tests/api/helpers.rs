@@ -1,9 +1,9 @@
-use std::net::TcpListener;
-
 use conduit::{
     configuration::{read_configuration, DatabaseSettings},
     startup::get_connection_pool,
+    Application,
 };
+use fake::{Fake, StringFaker};
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -13,24 +13,29 @@ pub struct TestApp {
 }
 
 /// Spawn a [`TestApp`] with a new random database, bind to a random port on
-/// localhost.
+/// localhost, with a random JWT shared secret.
 pub async fn spawn_app() -> TestApp {
-    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind to random port.");
-    let port = listener.local_addr().unwrap().port();
-
     // Randomize configuration to ensure test isolation
     let configuration = {
         let mut c = read_configuration().expect("Failed to read configuration.");
         // Use a different database for each test case
         c.database.database_name = format!("conduit_test_{}", Uuid::new_v4().to_string());
+        // Use a random OS port
+        c.app.port = 0;
+        // Generate a random dummy secret for JWT
+        const ALPHA_NUM: &str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        c.app.jwt_secret = StringFaker::with(Vec::from(ALPHA_NUM), 8..12).fake();
         c
     };
 
     configure_database(&configuration.database).await;
 
-    let server = conduit::run(listener, &configuration).expect("Failed to run server");
+    let application = Application::build(configuration.clone())
+        .await
+        .expect("Failed to build the application.");
 
-    let _ = tokio::spawn(server);
+    let port = application.port();
+    let _ = tokio::spawn(application.run_until_stopped());
 
     TestApp {
         address: format!("http://127.0.0.1:{}", port),

@@ -4,6 +4,7 @@
 //! - Read user information (`GET /api/user`): WIP module ;
 //! - Update user information (`PUT /api/user`): WIP module ;
 //! - Authentication (`POST /api/users/login`): WIP module.
+
 use actix_web::web;
 
 pub mod register;

@@ -5,4 +5,4 @@ pub mod repositories;
 pub mod services;
 pub mod startup;
 
-pub use startup::run;
+pub use startup::Application;
