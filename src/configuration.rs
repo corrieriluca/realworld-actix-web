@@ -10,12 +10,21 @@ use sqlx::{
     ConnectOptions,
 };
 
-#[derive(Deserialize)]
-pub struct AppSettings {
+#[derive(Clone, Deserialize)]
+pub struct Settings {
+    pub app: AppSettings,
     pub database: DatabaseSettings,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
+pub struct AppSettings {
+    pub host: String,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+    pub jwt_secret: String,
+}
+
+#[derive(Clone, Deserialize)]
 pub struct DatabaseSettings {
     pub host: String,
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -59,7 +68,7 @@ impl DatabaseSettings {
 /// specified in the YAML file.
 /// For example `CONDUIT_DATABASE__PASSWORD=password` would set the
 /// `AppSettings.database.password` field.
-pub fn read_configuration() -> Result<AppSettings, config::ConfigError> {
+pub fn read_configuration() -> Result<Settings, config::ConfigError> {
     let mut settings = config::Config::default();
     settings
         .merge(config::File::with_name("configuration"))?
