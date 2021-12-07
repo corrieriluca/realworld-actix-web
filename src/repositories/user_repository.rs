@@ -2,7 +2,7 @@
 
 use sqlx::PgPool;
 
-use crate::domain::users::new_user::NewUser;
+use crate::domain::users::NewUser;
 
 /// Inserts a new valid user in the database. If the user already exists in the
 /// database, this operation might fail (same username and/or same email).
