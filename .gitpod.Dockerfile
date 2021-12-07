@@ -2,8 +2,10 @@ FROM gitpod/workspace-full
 
 USER gitpod
 
-RUN bash -cl "rustup toolchain install nightly"
-RUN bash -cl "rustup toolchain install stable"
+ENV CARGO_HOME=
+
+RUN bash -cl "rustup update stable"
+RUN bash -cl "rustup update nightly"
 
 RUN bash -cl "cargo install sqlx-cli --no-default-features --features postgres"
 

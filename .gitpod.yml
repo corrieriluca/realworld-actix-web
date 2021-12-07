@@ -1,10 +1,11 @@
 image:
   file: .gitpod.Dockerfile
 
+tasks:
+  - name: Setup DB
+    init: ./scripts/dev_env.sh
+
 vscode:
   extensions:
     - bungcip.better-toml
     - matklad.rust-analyzer
-    - swellaby.vscode-rust-test-adapter
-    - hbenl.test-adapter-converter
-    - hbenl.vscode-test-explorer
