@@ -6,6 +6,7 @@ ENV CARGO_HOME=
 
 RUN bash -cl "rustup update stable"
 RUN bash -cl "rustup update nightly"
+RUN bash -cl "rustup default stable"
 
 RUN bash -cl "cargo install sqlx-cli --no-default-features --features postgres"
 
