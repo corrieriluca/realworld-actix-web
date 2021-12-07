@@ -1,4 +1,5 @@
 use claim::assert_none;
+use serde_json::Value;
 
 use crate::helpers::spawn_app;
 
@@ -91,6 +92,15 @@ async fn register_with_valid_body_should_return_200() {
 
     // Assert
     assert_eq!(200, response.status().as_u16());
+
+    let body: Value = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+
+    assert_ne!(Value::Null, body["user"]["username"]);
+    assert_ne!(Value::Null, body["user"]["email"]);
+    assert_ne!(Value::Null, body["user"]["token"]);
+
+    assert_eq!(Value::Null, body["user"]["bio"]);
+    assert_eq!(Value::Null, body["user"]["image"]);
 }
 
 #[actix_rt::test]
