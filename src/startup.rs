@@ -13,6 +13,7 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
+    models::auth::JwtSecret,
     services,
 };
 
@@ -57,9 +58,6 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
         .connect_timeout(std::time::Duration::from_secs(2))
         .connect_lazy_with(configuration.with_db())
 }
-
-/// Just a wrapper around a string that holds a JWT shared secret.
-pub struct JwtSecret(pub String);
 
 /// Builds a server ready to serve, listening on the given listener and
 /// encapsulating data like a database connection pool and a JWT shared secret.

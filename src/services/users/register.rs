@@ -3,9 +3,11 @@ use sqlx::PgPool;
 
 use crate::{
     domain::auth::create_jwt_for_user,
-    models::users::{UserRegistration, UserResponse},
+    models::{
+        auth::JwtSecret,
+        users::{UserRegistration, UserResponse},
+    },
     repositories::user_repository::insert_new_user,
-    startup::JwtSecret,
 };
 
 /// The type returned by the register request handler, either a UserResponse
