@@ -2,8 +2,9 @@ image:
   file: .gitpod.Dockerfile
 
 tasks:
-  - name: Setup DB
-    init: ./scripts/dev_env.sh
+  - name: Deploy dev environment and build all targets
+    before: ./scripts/dev_env.sh
+    init: cargo build --all-targets
 
 vscode:
   extensions:
