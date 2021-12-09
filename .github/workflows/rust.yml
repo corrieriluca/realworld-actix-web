@@ -75,7 +75,8 @@ jobs:
       - name: Compile tests
         uses: actions-rs/cargo@v1
         with:
-          command: test --no-run
+          command: test
+          args: --no-run --locked
 
       - name: Run tests
         uses: actions-rs/cargo@v1
