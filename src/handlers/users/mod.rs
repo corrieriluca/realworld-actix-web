@@ -1,4 +1,5 @@
-//! The Users service is responsible for handling CRU* actions on the users:
+//! The Users request handlers are responsible for handling CRU* actions on the
+//! users:
 //! - Create new users with registration (`POST /api/users`) with the
 //!   `register` module ;
 //! - Read user information (`GET /api/user`): WIP module ;

@@ -1,4 +1,4 @@
-//! This is the services module. It gathers all the different services
+//! This is the hendlers module. It gathers all the different request handlers
 //! (i.e. endpoints) of the API.
 
 use actix_web::web;
