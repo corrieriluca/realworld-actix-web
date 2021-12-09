@@ -14,7 +14,7 @@ async fn post_register_with_body(address: &str, body: &'static str) -> reqwest::
 }
 
 #[actix_rt::test]
-async fn register_with_no_body_should_return_400() {
+async fn register_with_no_body_should_return_422() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -27,11 +27,11 @@ async fn register_with_no_body_should_return_400() {
         .expect("Failed to execute request.");
 
     // Assert
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(422, response.status().as_u16());
 }
 
 #[actix_rt::test]
-async fn register_with_no_content_type_should_return_400() {
+async fn register_with_no_content_type_should_return_422() {
     // Arrange
     let app = spawn_app().await;
     let client = reqwest::Client::new();
@@ -45,11 +45,11 @@ async fn register_with_no_content_type_should_return_400() {
         .expect("Failed to execute request.");
 
     // Assert
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(422, response.status().as_u16());
 }
 
 #[actix_rt::test]
-async fn register_with_incorrect_body_should_return_400() {
+async fn register_with_incorrect_body_should_return_422() {
     // Arrange
     let app = spawn_app().await;
 
@@ -57,11 +57,11 @@ async fn register_with_incorrect_body_should_return_400() {
     let response = post_register_with_body(app.address(), r#"{"user":"invalid_data"}"#).await;
 
     // Assert
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(422, response.status().as_u16());
 }
 
 #[actix_rt::test]
-async fn register_with_not_valid_body_should_return_400() {
+async fn register_with_not_valid_email_should_return_422() {
     // Arrange
     let app = spawn_app().await;
 
@@ -75,11 +75,29 @@ async fn register_with_not_valid_body_should_return_400() {
     .await;
 
     // Assert
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(422, response.status().as_u16());
 }
 
 #[actix_rt::test]
-async fn register_with_valid_body_should_return_200() {
+async fn register_with_empty_password_should_return_422() {
+    // Arrange
+    let app = spawn_app().await;
+
+    // Act
+
+    // Invalid email address!
+    let response = post_register_with_body(
+        app.address(),
+        r#"{"user":{"username":"jack","email":"jake@jake.com","password":""}}"#,
+    )
+    .await;
+
+    // Assert
+    assert_eq!(422, response.status().as_u16());
+}
+
+#[actix_rt::test]
+async fn register_with_valid_body_should_return_201() {
     // Arrange
     let app = spawn_app().await;
 
@@ -91,7 +109,7 @@ async fn register_with_valid_body_should_return_200() {
     .await;
 
     // Assert
-    assert_eq!(200, response.status().as_u16());
+    assert_eq!(201, response.status().as_u16());
 
     let body: Value = serde_json::from_str(&response.text().await.unwrap()).unwrap();
 
@@ -143,7 +161,7 @@ async fn register_with_already_used_username_or_email_should_return_500() {
     )
     .await;
 
-    assert_eq!(200, response.status().as_u16());
+    assert_eq!(201, response.status().as_u16());
 
     // Second insertion, slightly different but same username
     let response = post_register_with_body(

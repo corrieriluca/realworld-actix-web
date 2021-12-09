@@ -17,6 +17,10 @@ impl TryFrom<UserRegistration> for NewUser {
     fn try_from(value: UserRegistration) -> Result<Self, Self::Error> {
         let username = Username::parse(value.user.username)?;
         let email = UserEmail::parse(value.user.email)?;
+        if value.user.password.is_empty() {
+            return Err(format!("A password cannot be empty."));
+        }
+
         let mut hasher = Sha3_512::new();
         hasher.update(value.user.password.as_str());
         let hashed_password = format!("{:x}", hasher.finalize());
