@@ -8,5 +8,5 @@ tasks:
 
 vscode:
   extensions:
-    - bungcip.better-toml
+    - tamasfe.even-better-toml
     - matklad.rust-analyzer
