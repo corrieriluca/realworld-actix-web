@@ -8,12 +8,12 @@
 
 use std::net::TcpListener;
 
-use actix_web::{dev::Server, middleware::Logger, web, App, HttpServer};
+use actix_web::{dev::Server, error, middleware::Logger, web, App, HttpServer};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    handlers,
+    handlers::{self, error::validation_error},
     models::auth::JwtSecret,
 };
 
@@ -69,10 +69,22 @@ fn build_server(
     let db_pool = web::Data::new(db_pool);
     let jwt_secret = web::Data::new(jwt_secret);
 
+    // Custom Json extractor configuration
+    let json_cfg = web::JsonConfig::default()
+        // Only accept application/json content type
+        .content_type(|mime| mime == mime::APPLICATION_JSON)
+        // Use custom error handler that returns 422 status code and proper
+        // error response
+        .error_handler(|err, _| {
+            let response = validation_error(&format!("{}", err));
+            error::InternalError::from_response(err, response.into()).into()
+        });
+
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .service(web::scope("/api").configure(handlers::config))
+            .app_data(json_cfg.clone())
             .app_data(db_pool.clone())
             .app_data(jwt_secret.clone())
     })
