@@ -77,7 +77,7 @@ fn build_server(
         // error response
         .error_handler(|err, _| {
             let response = validation_error(&format!("{}", err));
-            error::InternalError::from_response(err, response.into()).into()
+            error::InternalError::from_response(err, response).into()
         });
 
     let server = HttpServer::new(move || {
