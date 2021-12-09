@@ -3,7 +3,7 @@ use serde_json::Value;
 
 use crate::helpers::spawn_app;
 
-pub async fn post_register_with_body(address: &str, body: &'static str) -> reqwest::Response {
+async fn post_register_with_body(address: &str, body: &'static str) -> reqwest::Response {
     reqwest::Client::new()
         .post(&format!("{}/api/users", address))
         .header("Content-Type", "application/json")
@@ -21,7 +21,7 @@ async fn register_with_no_body_should_return_400() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/users", app.address))
+        .post(&format!("{}/api/users", app.address()))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -38,7 +38,7 @@ async fn register_with_no_content_type_should_return_400() {
 
     // Act
     let response = client
-        .post(&format!("{}/api/users", app.address))
+        .post(&format!("{}/api/users", app.address()))
         .body(r#"{"user":{"username":"jack","email":"jake@jake.com","password":"jack"}}"#)
         .send()
         .await
@@ -54,7 +54,7 @@ async fn register_with_incorrect_body_should_return_400() {
     let app = spawn_app().await;
 
     // Act
-    let response = post_register_with_body(&app.address, r#"{"user":"invalid_data"}"#).await;
+    let response = post_register_with_body(app.address(), r#"{"user":"invalid_data"}"#).await;
 
     // Assert
     assert_eq!(400, response.status().as_u16());
@@ -69,7 +69,7 @@ async fn register_with_not_valid_body_should_return_400() {
 
     // Invalid email address!
     let response = post_register_with_body(
-        &app.address,
+        app.address(),
         r#"{"user":{"username":"jack","email":"@jake.com","password":"jack"}}"#,
     )
     .await;
@@ -85,7 +85,7 @@ async fn register_with_valid_body_should_return_200() {
 
     // Act
     let response = post_register_with_body(
-        &app.address,
+        app.address(),
         r#"{"user":{"username":"jack","email":"jake@jake.com","password":"jack"}}"#,
     )
     .await;
@@ -110,14 +110,14 @@ async fn register_with_valid_body_persists_in_database() {
 
     // Act
     let _ = post_register_with_body(
-        &app.address,
+        app.address(),
         r#"{"user":{"username":"jack","email":"jake@jake.com","password":"jack"}}"#,
     )
     .await;
 
     // Assert
     let saved = sqlx::query!("SELECT username, email, password, bio, image FROM users")
-        .fetch_one(&app.db_pool)
+        .fetch_one(app.db_pool())
         .await
         .expect("Failed to fetch the saved user");
 
@@ -138,7 +138,7 @@ async fn register_with_already_used_username_or_email_should_return_500() {
 
     // First insertion
     let response = post_register_with_body(
-        &app.address,
+        app.address(),
         r#"{"user":{"username":"jack","email":"jake@jake.com","password":"jack"}}"#,
     )
     .await;
@@ -147,7 +147,7 @@ async fn register_with_already_used_username_or_email_should_return_500() {
 
     // Second insertion, slightly different but same username
     let response = post_register_with_body(
-        &app.address,
+        app.address(),
         r#"{"user":{"username":"jack","email":"user@domain.com","password":"different"}}"#,
     )
     .await;
@@ -156,7 +156,7 @@ async fn register_with_already_used_username_or_email_should_return_500() {
 
     // Third insertion, slightly different but same email address
     let response = post_register_with_body(
-        &app.address,
+        app.address(),
         r#"{"user":{"username":"john","email":"jake@jake.com","password":"john"}}"#,
     )
     .await;
