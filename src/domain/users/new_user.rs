@@ -18,7 +18,7 @@ impl TryFrom<UserRegistration> for NewUser {
         let username = Username::parse(value.user.username)?;
         let email = UserEmail::parse(value.user.email)?;
         if value.user.password.is_empty() {
-            return Err(format!("A password cannot be empty."));
+            return Err("A password cannot be empty.".to_string());
         }
 
         let mut hasher = Sha3_512::new();
