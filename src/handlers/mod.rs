@@ -12,5 +12,6 @@ pub mod users;
 /// Called in the application factory.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(health_check::health_check);
-    cfg.service(web::scope("/users").configure(users::config));
+    cfg.service(web::scope("/users").configure(users::config_users));
+    cfg.service(web::scope("/user").configure(users::config_user));
 }
