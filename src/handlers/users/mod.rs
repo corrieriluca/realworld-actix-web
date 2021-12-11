@@ -9,8 +9,14 @@
 use actix_web::web;
 
 pub mod register;
+pub mod user_info;
 
 /// Configure the Users service: registration and authentication.
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn config_users(cfg: &mut web::ServiceConfig) {
     cfg.service(register::register);
+}
+
+/// Configure the User service: Get user info and Update user.
+pub fn config_user(cfg: &mut web::ServiceConfig) {
+    cfg.service(user_info::user_info);
 }
