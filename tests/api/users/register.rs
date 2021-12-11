@@ -148,7 +148,7 @@ async fn register_with_valid_body_persists_in_database() {
 }
 
 #[actix_rt::test]
-async fn register_with_already_used_username_or_email_should_return_500() {
+async fn register_with_already_used_username_or_email_should_return_422() {
     // Arrange
     let app = spawn_app().await;
 
@@ -170,7 +170,7 @@ async fn register_with_already_used_username_or_email_should_return_500() {
     )
     .await;
 
-    assert_eq!(500, response.status().as_u16());
+    assert_eq!(422, response.status().as_u16());
 
     // Third insertion, slightly different but same email address
     let response = post_register_with_body(
@@ -179,5 +179,5 @@ async fn register_with_already_used_username_or_email_should_return_500() {
     )
     .await;
 
-    assert_eq!(500, response.status().as_u16());
+    assert_eq!(422, response.status().as_u16());
 }

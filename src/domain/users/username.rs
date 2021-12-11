@@ -16,7 +16,9 @@ impl Username {
             .chars()
             .all(|c| char::is_ascii_alphanumeric(&c) || c == '_');
 
-        if is_empty_or_whitespace || is_too_long || !is_alphanumeric_with_underscores {
+        if is_empty_or_whitespace {
+            Err("An username cannot be empty.".to_string())
+        } else if is_too_long || !is_alphanumeric_with_underscores {
             Err(format!("{} is not a valid username.", s))
         } else {
             Ok(Self(s))

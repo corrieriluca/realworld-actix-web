@@ -2,11 +2,11 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct ErrorResponse<'a> {
-    errors: ErrorBodies<'a>,
+    errors: ErrorBody<'a>,
 }
 
 #[derive(Serialize)]
-struct ErrorBodies<'a> {
+struct ErrorBody<'a> {
     body: Vec<&'a str>,
 }
 
@@ -14,7 +14,7 @@ impl<'a> ErrorResponse<'a> {
     /// Create a new [`ErrorResponse`]
     pub fn new(error: &'a str) -> Self {
         ErrorResponse {
-            errors: ErrorBodies { body: vec![error] },
+            errors: ErrorBody { body: vec![error] },
         }
     }
 }
