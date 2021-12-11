@@ -36,9 +36,14 @@ async fn register(
                     None,
                     token,
                 )),
-                Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
+                Err(_) => HttpResponse::InternalServerError().body("Unexpected error happened."),
             }
         },
-        Err(e) => HttpResponse::InternalServerError().body(format!("{}", e)),
+        Err(e) => match e {
+            sqlx::Error::Database(_) => validation_error(
+                "Unable to create the user. The username or email might be already in use.",
+            ),
+            _ => HttpResponse::InternalServerError().body("Unexpected error happened."),
+        },
     }
 }
