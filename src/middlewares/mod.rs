@@ -2,4 +2,4 @@
 
 pub mod auth;
 
-pub use auth::Authentication;
+pub use auth::{AuthenticatedUser, Authentication};

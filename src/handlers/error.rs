@@ -5,7 +5,7 @@ use actix_web::HttpResponse;
 
 use crate::models::error::ErrorResponse;
 
-/// Returns a crafted [`HttpResponse`], ready to be returned by a request
+/// Returns a [`HttpResponse`], ready to be returned by a request
 /// handler in case of **validation** error with the appropriate body.
 /// The HTTP Status Code is set to 422 Unprocessable Entity, and the body
 /// is a JSON-encoded [`ErrorResponse`].
