@@ -28,3 +28,16 @@ pub fn create_jwt_for_user(
         &EncodingKey::from_secret(shared_secret.as_ref()),
     )
 }
+
+// pub fn decode_token(
+//     token: String,
+//     shared_secret: &str,
+// ) -> Result<Claims, jsonwebtoken::errors::Error> {
+//     let token_data = decode::<Claims>(
+//         &token,
+//         &DecodingKey::from_secret(shared_secret.as_ref()),
+//         &Validation::default(),
+//     )?;
+
+//     Ok(token_data.claims)
+// }

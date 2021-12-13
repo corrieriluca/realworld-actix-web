@@ -13,5 +13,43 @@
       },
       "nullable": []
     }
+  },
+  "f2877bc1474dbaddbd8e94ad9195a2dd14e05bc5f0d0859b1e333856618e5c55": {
+    "query": "\n        SELECT username, email, bio, image\n        FROM users\n        WHERE username = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "email",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "bio",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "image",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true
+      ]
+    }
   }
 }
