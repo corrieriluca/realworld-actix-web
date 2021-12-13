@@ -27,7 +27,7 @@ use actix_web::{
 pub struct Authentication;
 
 /// Structure that holds the information of a succeeded authentication.
-pub type AuthenticationInfo = Rc<AuthenticationResult>;
+type AuthenticationInfo = Rc<AuthenticationResult>;
 
 pub struct AuthenticationResult {
     /// The valid JWT token attached to this authentication.
