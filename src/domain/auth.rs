@@ -1,4 +1,4 @@
-use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 
 use crate::models::auth::Claims;
 
@@ -8,9 +8,9 @@ fn create_claims_from_user(username: &str) -> Claims {
     let exp = iat + time::Duration::hours(1);
 
     Claims::new(
-        "conduit-v1",
-        username,
-        "conduit-v1",
+        "conduit-v1".to_owned(),
+        username.to_owned(),
+        "conduit-v1".to_owned(),
         exp.unix_timestamp() as u64,
         iat.unix_timestamp() as u64,
     )
@@ -29,15 +29,15 @@ pub fn create_jwt_for_user(
     )
 }
 
-// pub fn decode_token(
-//     token: String,
-//     shared_secret: &str,
-// ) -> Result<Claims, jsonwebtoken::errors::Error> {
-//     let token_data = decode::<Claims>(
-//         &token,
-//         &DecodingKey::from_secret(shared_secret.as_ref()),
-//         &Validation::default(),
-//     )?;
+pub fn decode_token(
+    token: &str,
+    shared_secret: &str,
+) -> Result<Claims, jsonwebtoken::errors::Error> {
+    let token_data = decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(shared_secret.as_ref()),
+        &Validation::new(Algorithm::HS256),
+    )?;
 
-//     Ok(token_data.claims)
-// }
+    Ok(token_data.claims)
+}

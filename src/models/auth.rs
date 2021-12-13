@@ -8,17 +8,17 @@ pub struct JwtSecret(pub String);
 
 /// The structure defining the payload part of a JWT.
 #[derive(Serialize, Deserialize)]
-pub struct Claims<'a> {
-    iss: &'static str,
-    sub: &'a str,
-    aud: &'static str,
+pub struct Claims {
+    iss: String,
+    sub: String,
+    aud: String,
     exp: u64,
     iat: u64,
 }
 
-impl<'a> Claims<'a> {
+impl Claims {
     /// Creates a new Claims structure with the given values as fields.
-    pub fn new(iss: &'static str, sub: &'a str, aud: &'static str, exp: u64, iat: u64) -> Self {
+    pub fn new(iss: String, sub: String, aud: String, exp: u64, iat: u64) -> Self {
         Self {
             iss,
             sub,
