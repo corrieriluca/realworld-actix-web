@@ -11,9 +11,8 @@
 //! Note that this is not RFC-compliant.
 
 use std::{
-    future::{ready, Future, Ready},
+    future::{ready, Ready},
     ops::Deref,
-    pin::Pin,
     rc::Rc,
 };
 
@@ -22,6 +21,7 @@ use actix_web::{
     error::ErrorUnauthorized,
     Error, FromRequest, HttpMessage,
 };
+use futures::{future::LocalBoxFuture, FutureExt};
 
 use crate::models::users::User;
 
@@ -39,12 +39,12 @@ pub struct AuthenticationResult {
 }
 
 pub struct AuthenticationMiddleware<S> {
-    service: S,
+    service: Rc<S>,
 }
 
 impl<S, B> Transform<S, ServiceRequest> for Authentication
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
@@ -55,20 +55,21 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(AuthenticationMiddleware { service }))
+        ready(Ok(AuthenticationMiddleware {
+            service: Rc::new(service),
+        }))
     }
 }
 
 impl<S, B> Service<ServiceRequest> for AuthenticationMiddleware<S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
-    #[allow(clippy::type_complexity)]
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
         &self,
@@ -78,29 +79,33 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        // TODO: Perform authentication logic and validation
+        // Clone the Rc pointer so we can move it into the async block
+        let service = Rc::clone(&self.service);
 
-        // Store the authentication result in the request's extensions
-        req.extensions_mut()
-            .insert::<AuthenticationInfo>(Rc::new(AuthenticationResult {
-                token: "jwt.token.here".into(),
-                user: User {
-                    username: "username".into(),
-                    email: "user@example.com".into(),
-                    bio: None,
-                    image: None,
-                },
-            }));
+        async move {
+            // TODO: Perform authentication logic and validation
 
-        // Call the next service
-        let fut = self.service.call(req);
+            // Store the authentication result in the request's extensions
+            req.extensions_mut()
+                .insert::<AuthenticationInfo>(Rc::new(AuthenticationResult {
+                    token: "jwt.token.here".into(),
+                    user: User {
+                        username: "username".into(),
+                        email: "user@example.com".into(),
+                        bio: None,
+                        image: None,
+                    },
+                }));
 
-        // Send the (unmodified) response
-        Box::pin(async move {
+            // Call the next service
+            let fut = service.call(req);
+
+            // Send the (unmodified) response
             let res = fut.await?;
 
             Ok(res)
-        })
+        }
+        .boxed_local()
     }
 }
 
