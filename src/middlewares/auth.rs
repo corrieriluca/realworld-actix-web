@@ -23,6 +23,8 @@ use actix_web::{
     Error, FromRequest, HttpMessage,
 };
 
+use crate::models::users::User;
+
 /// Struct for registering the authentication middleware.
 pub struct Authentication;
 
@@ -33,7 +35,7 @@ pub struct AuthenticationResult {
     /// The valid JWT token attached to this authentication.
     pub token: String,
     /// The user that is authentified.
-    pub user: String,
+    pub user: User,
 }
 
 pub struct AuthenticationMiddleware<S> {
@@ -82,7 +84,12 @@ where
         req.extensions_mut()
             .insert::<AuthenticationInfo>(Rc::new(AuthenticationResult {
                 token: "jwt.token.here".into(),
-                user: "username_here".into(),
+                user: User {
+                    username: "username".into(),
+                    email: "user@example.com".into(),
+                    bio: None,
+                    image: None,
+                },
             }));
 
         // Call the next service
