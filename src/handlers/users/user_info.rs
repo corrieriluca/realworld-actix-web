@@ -2,6 +2,10 @@ use actix_web::{get, HttpResponse};
 
 use crate::{middlewares, models::users::UserResponse};
 
+/// The `GET /api/user` endpoint. **Requires authentication.**
+/// Return 200 OK with an user response as JSON body.
+/// Return 401 Unauthorized (by the authentication middleware) if there is not
+/// a valid authentication.
 #[get("", wrap = "middlewares::Authentication")]
 async fn user_info(user: middlewares::AuthenticatedUser) -> HttpResponse {
     HttpResponse::Ok().json(UserResponse::new(

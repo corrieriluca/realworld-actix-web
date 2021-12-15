@@ -18,7 +18,7 @@ use std::{
 
 use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
-    error::ErrorUnauthorized,
+    error::{ErrorInternalServerError, ErrorUnauthorized},
     web::Data,
     Error, FromRequest, HttpMessage,
 };
@@ -89,30 +89,52 @@ where
         let service = Rc::clone(&self.service);
 
         async move {
-            // Perform authentication logic and validation
-            if let Some(pool) = req.app_data::<Data<PgPool>>() {
-                if let Some(jwt_secret) = req.app_data::<Data<JwtSecret>>() {
-                    if let Some(auth_header) = req.headers().get("Authorization") {
-                        if let Ok(auth_header) = auth_header.to_str() {
-                            if let Some(token) = auth_header.strip_prefix("Token") {
-                                let token = token.trim();
-                                if let Ok(claims) = decode_token(token, &jwt_secret.0) {
-                                    if let Ok(user) =
-                                        get_user_by_username(pool, claims.username()).await
-                                    {
-                                        // Store the authentication result in the request's extensions
-                                        req.extensions_mut().insert::<AuthenticationInfo>(Rc::new(
-                                            AuthenticationResult {
-                                                token: token.into(),
-                                                user,
-                                            },
-                                        ));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            // Perform authentication logic and validation:
+
+            // 1. Retrieve the DB Pool and the JWT secret
+            let (pool, jwt_secret) = match (
+                req.app_data::<Data<PgPool>>(),
+                req.app_data::<Data<JwtSecret>>(),
+            ) {
+                (Some(p), Some(j)) => (p, j),
+                _ => {
+                    return Err(ErrorInternalServerError(
+                        "Cannot access to internal resources.",
+                    ))
+                },
+            };
+
+            // 2. Extract the token from the request's Authorization header
+            let token = match req.headers().get("Authorization") {
+                Some(auth_header) => match auth_header.to_str() {
+                    Ok(auth_header) => match auth_header.strip_prefix("Token") {
+                        Some(token) => token.trim().to_owned(),
+                        None => {
+                            return Err(ErrorUnauthorized(
+                                "Invalid format for Authorization header.",
+                            ))
+                        },
+                    },
+                    Err(_) => {
+                        return Err(ErrorUnauthorized(
+                            "Invalid format for Authorization header.",
+                        ))
+                    },
+                },
+                None => return Err(ErrorUnauthorized("No Authorization header found.")),
+            };
+
+            // 3. Decode the token and associate an user to it
+            match decode_token(&token, &jwt_secret.0) {
+                Ok(claims) => match get_user_by_username(pool, claims.username()).await {
+                    Ok(user) => {
+                        req.extensions_mut().insert::<AuthenticationInfo>(Rc::new(
+                            AuthenticationResult { token, user },
+                        ));
+                    },
+                    Err(_) => return Err(ErrorUnauthorized("Invalid token.")),
+                },
+                Err(_) => return Err(ErrorUnauthorized("Invalid token.")),
             }
 
             // Call the next service
@@ -128,8 +150,9 @@ where
 }
 
 /// Request extractor that extracts an authentication result from the request's
-/// extensions. The extracted result must have been added by the
-/// [`Authentication`] middleware, or it will result in a Unauthorized error
+/// extensions. This extractor **must** be used in conjunction with the
+/// [`Authentication`] middleware as it extracts the [`AuthenticationInfo`] in
+/// the request's extensions. Otherwise it will result in an Unauthorized error
 /// (header not present).
 pub struct AuthenticatedUser(AuthenticationInfo);
 
@@ -144,6 +167,8 @@ impl FromRequest for AuthenticatedUser {
         let value = req.extensions().get::<AuthenticationInfo>().cloned();
         let result = match value {
             Some(v) => Ok(AuthenticatedUser(v)),
+            // Usually None is returned is the authentication middleware has not
+            // been used.
             None => Err(ErrorUnauthorized(
                 "You must provide an Authorization header.",
             )),
