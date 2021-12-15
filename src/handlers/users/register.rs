@@ -30,11 +30,11 @@ async fn register(
         Ok(_) => {
             match create_jwt_for_user(new_user.username.as_ref(), &jwt_secret.into_inner().0) {
                 Ok(token) => HttpResponse::Created().json(UserResponse::new(
-                    new_user.username.as_ref().into(),
-                    new_user.email.as_ref().into(),
+                    new_user.username.as_ref(),
+                    new_user.email.as_ref(),
                     None,
                     None,
-                    token,
+                    &token,
                 )),
                 Err(_) => HttpResponse::InternalServerError().body("Unexpected error happened."),
             }

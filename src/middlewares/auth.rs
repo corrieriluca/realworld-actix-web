@@ -19,11 +19,17 @@ use std::{
 use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
     error::ErrorUnauthorized,
+    web::Data,
     Error, FromRequest, HttpMessage,
 };
 use futures::{future::LocalBoxFuture, FutureExt};
+use sqlx::PgPool;
 
-use crate::models::users::User;
+use crate::{
+    domain::auth::decode_token,
+    models::{auth::JwtSecret, users::User},
+    repositories::user_repository::get_user_by_username,
+};
 
 /// Struct for registering the authentication middleware.
 pub struct Authentication;
@@ -83,19 +89,31 @@ where
         let service = Rc::clone(&self.service);
 
         async move {
-            // TODO: Perform authentication logic and validation
-
-            // Store the authentication result in the request's extensions
-            req.extensions_mut()
-                .insert::<AuthenticationInfo>(Rc::new(AuthenticationResult {
-                    token: "jwt.token.here".into(),
-                    user: User {
-                        username: "username".into(),
-                        email: "user@example.com".into(),
-                        bio: None,
-                        image: None,
-                    },
-                }));
+            // Perform authentication logic and validation
+            if let Some(pool) = req.app_data::<Data<PgPool>>() {
+                if let Some(jwt_secret) = req.app_data::<Data<JwtSecret>>() {
+                    if let Some(auth_header) = req.headers().get("Authorization") {
+                        if let Ok(auth_header) = auth_header.to_str() {
+                            if let Some(token) = auth_header.strip_prefix("Token") {
+                                let token = token.trim();
+                                if let Ok(claims) = decode_token(token, &jwt_secret.0) {
+                                    if let Ok(user) =
+                                        get_user_by_username(pool, claims.username()).await
+                                    {
+                                        // Store the authentication result in the request's extensions
+                                        req.extensions_mut().insert::<AuthenticationInfo>(Rc::new(
+                                            AuthenticationResult {
+                                                token: token.into(),
+                                                user,
+                                            },
+                                        ));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             // Call the next service
             let fut = service.call(req);
@@ -127,7 +145,7 @@ impl FromRequest for AuthenticatedUser {
         let result = match value {
             Some(v) => Ok(AuthenticatedUser(v)),
             None => Err(ErrorUnauthorized(
-                "You must provided an Authorization header.",
+                "You must provide an Authorization header.",
             )),
         };
 
