@@ -2,7 +2,7 @@
 //! users:
 //! - Create new users with registration (`POST /api/users`) with the
 //!   `register` module ;
-//! - Read user information (`GET /api/user`): WIP module ;
+//! - Read user information (`GET /api/user`) with the `user_info` module ;
 //! - Update user information (`PUT /api/user`): WIP module ;
 //! - Authentication (`POST /api/users/login`): WIP module.
 
