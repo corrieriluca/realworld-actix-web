@@ -27,4 +27,9 @@ impl Claims {
             iat,
         }
     }
+
+    /// Get a reference to the username referenced in this claims (`sub` field).
+    pub fn username(&self) -> &str {
+        self.sub.as_ref()
+    }
 }

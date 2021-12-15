@@ -3,31 +3,31 @@ use serde::Serialize;
 /// The User API Response format, as described in the spec, encapsulates
 /// user information inside a `user` field.
 #[derive(Serialize)]
-pub struct UserResponse {
-    user: UserResponseFields,
+pub struct UserResponse<'a> {
+    user: UserResponseFields<'a>,
 }
 
 /// The user fields. We accept `bio` and `image` to be [`None`]
 /// (translated to `null` in JSON) as they have not a default value on
 /// registration.
 #[derive(Serialize)]
-struct UserResponseFields {
-    username: String,
-    email: String,
-    bio: Option<String>,
-    image: Option<String>,
-    token: String,
+struct UserResponseFields<'a> {
+    username: &'a str,
+    email: &'a str,
+    bio: Option<&'a str>,
+    image: Option<&'a str>,
+    token: &'a str,
 }
 
-impl UserResponse {
+impl<'a> UserResponse<'a> {
     /// Constructs a new [`UserResponse`] with the given values for the fields
     /// of the [`UserResponseFields`] strcture.
     pub fn new(
-        username: String,
-        email: String,
-        bio: Option<String>,
-        image: Option<String>,
-        token: String,
+        username: &'a str,
+        email: &'a str,
+        bio: Option<&'a str>,
+        image: Option<&'a str>,
+        token: &'a str,
     ) -> Self {
         Self {
             user: UserResponseFields {
