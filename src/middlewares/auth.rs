@@ -44,6 +44,7 @@ pub struct AuthenticationResult {
     pub user: User,
 }
 
+/// The implementation of the authentication middleware
 pub struct AuthenticationMiddleware<S> {
     service: Rc<S>,
 }
@@ -179,7 +180,7 @@ impl FromRequest for AuthenticatedUser {
 }
 
 /// Implements Deref trait for easier retrieving of the inner type of
-/// [`Authenticated`].
+/// [`AuthenticationInfo`].
 impl Deref for AuthenticatedUser {
     type Target = AuthenticationInfo;
 
