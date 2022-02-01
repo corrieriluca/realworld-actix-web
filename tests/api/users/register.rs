@@ -88,7 +88,7 @@ async fn register_with_empty_password_should_return_422() {
 
     // Act
 
-    // Invalid email address!
+    // Empty password!
     let response = post_register_with_body(
         app.address(),
         r#"{"user":{"username":"jack","email":"jake@jake.com","password":""}}"#,

@@ -4,19 +4,23 @@
 //!   `register` module ;
 //! - Read user information (`GET /api/user`) with the `user_info` module ;
 //! - Update user information (`PUT /api/user`): WIP module ;
-//! - Authentication (`POST /api/users/login`): WIP module.
+//! - Authentication (`POST /api/users/login`) with the `login` module.
 
 use actix_web::web;
 
+pub mod login;
 pub mod register;
 pub mod user_info;
 
 /// Configure the Users service: registration and authentication.
+/// `/api/users/...` endpoints.
 pub fn config_users(cfg: &mut web::ServiceConfig) {
     cfg.service(register::register);
+    cfg.service(login::login);
 }
 
 /// Configure the User service: Get user info and Update user.
+/// `/api/user` endpoints.
 pub fn config_user(cfg: &mut web::ServiceConfig) {
     cfg.service(user_info::user_info);
 }

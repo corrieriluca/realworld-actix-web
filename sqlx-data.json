@@ -1,5 +1,49 @@
 {
   "db": "PostgreSQL",
+  "765e8797484768d56c4b52c3322cc9a112eb5d88ac3c465c25336f6d73268d0e": {
+    "query": "\n        SELECT username, email, password, bio, image\n        FROM users\n        WHERE email = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "email",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "password",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "bio",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "image",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        true
+      ]
+    }
+  },
   "a4cde3ed56b1487a9dcf70cd83f7cfd5d453beedb3c74f831d25232f294e87e0": {
     "query": "\n        INSERT INTO users (username, email, password)\n        VALUES ($1, $2, $3)\n        ",
     "describe": {
