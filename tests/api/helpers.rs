@@ -75,5 +75,5 @@ async fn configure_database(config: &DatabaseSettings) {
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
         .await
-        .expect("Failed to migrate database");
+        .expect("Failed to run migrations on the database");
 }

@@ -3,7 +3,10 @@ use serde_json::Value;
 
 use crate::helpers::spawn_app;
 
-async fn post_register_with_body(address: &str, body: &'static str) -> reqwest::Response {
+pub(crate) async fn post_register_with_body(
+    address: &str,
+    body: &'static str,
+) -> reqwest::Response {
     reqwest::Client::new()
         .post(&format!("{}/api/users", address))
         .header("Content-Type", "application/json")
@@ -163,7 +166,7 @@ async fn register_with_already_used_username_or_email_should_return_422() {
 
     assert_eq!(201, response.status().as_u16());
 
-    // Second insertion, slightly different but same username
+    // Second insertion, the username is the same
     let response = post_register_with_body(
         app.address(),
         r#"{"user":{"username":"jack","email":"user@domain.com","password":"different"}}"#,
@@ -172,7 +175,7 @@ async fn register_with_already_used_username_or_email_should_return_422() {
 
     assert_eq!(422, response.status().as_u16());
 
-    // Third insertion, slightly different but same email address
+    // Third insertion, the email address is the same
     let response = post_register_with_body(
         app.address(),
         r#"{"user":{"username":"john","email":"jake@jake.com","password":"john"}}"#,
