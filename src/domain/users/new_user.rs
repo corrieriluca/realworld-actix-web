@@ -3,6 +3,7 @@ use sha3::{Digest, Sha3_512};
 use super::{email::UserEmail, username::Username};
 use crate::models::users::UserRegistration;
 
+/// This struct represents a valid user input for registration.
 pub struct NewUser {
     pub username: Username,
     pub email: UserEmail,
