@@ -30,7 +30,6 @@ async fn update_bio_and_image_should_return_200() {
     let token = body["user"]["token"].as_str().unwrap();
 
     // Act
-
     let response = put_update_with_body(
         app.address(),
         r#"{"user":{"bio":"This is my bio","image":"https://image.com"}}"#,
@@ -105,6 +104,29 @@ async fn update_everything_should_return_200() {
 }
 
 #[actix_rt::test]
+async fn update_nothing_should_return_422() {
+    // Arrange
+    let app = spawn_app().await;
+
+    let response = post_register_with_body(
+        app.address(),
+        r#"{"user":{"username":"jack","email":"jake@jake.com","password":"jack1234"}}"#,
+    )
+    .await;
+
+    assert_eq!(201, response.status().as_u16());
+
+    let body: Value = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+    let token = body["user"]["token"].as_str().unwrap();
+
+    // Act
+    let response = put_update_with_body(app.address(), r#"{"user":{}}"#, token).await;
+
+    // Assert
+    assert_eq!(422, response.status().as_u16());
+}
+
+#[actix_rt::test]
 async fn update_invalid_image_should_return_422() {
     // Arrange
     let app = spawn_app().await;
@@ -121,7 +143,6 @@ async fn update_invalid_image_should_return_422() {
     let token = body["user"]["token"].as_str().unwrap();
 
     // Act
-
     let response =
         put_update_with_body(app.address(), r#"{"user":{"image":"invalid_url"}}"#, token).await;
 
@@ -173,7 +194,7 @@ async fn update_invalid_password_should_return_422() {
 
     // Act
 
-    // More than 140 characters long bio
+    // Empty password
     let response = put_update_with_body(app.address(), r#"{"user":{"password":""}}"#, token).await;
 
     // Assert
@@ -198,7 +219,7 @@ async fn update_invalid_username_should_return_422() {
 
     // Act
 
-    // More than 140 characters long bio
+    // Invalid username
     let response = put_update_with_body(
         app.address(),
         r#"{"user":{"username":"a not valid username"}}"#,
@@ -228,7 +249,7 @@ async fn update_invalid_email_should_return_422() {
 
     // Act
 
-    // More than 140 characters long bio
+    // Invalid email
     let response = put_update_with_body(
         app.address(),
         r#"{"user":{"email":"not_valid_email@"}}"#,
