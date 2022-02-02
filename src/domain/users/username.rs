@@ -19,7 +19,7 @@ impl Username {
         if is_empty_or_whitespace {
             Err("An username cannot be empty.".to_string())
         } else if is_too_long || !is_alphanumeric_with_underscores {
-            Err(format!("{} is not a valid username.", s))
+            Err(format!("{s} is not a valid username."))
         } else {
             Ok(Self(s))
         }
