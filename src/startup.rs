@@ -13,7 +13,8 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    handlers::{self, error::validation_error},
+    domain::error::validation_error,
+    handlers,
     models::auth::JwtSecret,
 };
 

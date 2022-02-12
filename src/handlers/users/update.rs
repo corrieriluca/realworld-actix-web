@@ -2,8 +2,7 @@ use actix_web::{put, web, HttpResponse};
 use sqlx::PgPool;
 
 use crate::{
-    domain::{auth::create_jwt_for_user, users::UpdateUser},
-    handlers::error::validation_error,
+    domain::{auth::create_jwt_for_user, error::validation_error, users::UpdateUser},
     middlewares,
     models::{
         auth::JwtSecret,
