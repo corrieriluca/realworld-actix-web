@@ -27,8 +27,7 @@ use sqlx::PgPool;
 
 use crate::{
     domain::auth::{decode_token, JwtSecret},
-    models::users::User,
-    repositories::user_repository::get_user_by_username,
+    repositories::user_repository::{get_user_by_username, User},
 };
 
 /// Struct for registering the authentication middleware.

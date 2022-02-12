@@ -5,10 +5,10 @@ use crate::{
     domain::{
         auth::{create_jwt_for_user, JwtSecret},
         error::validation_error,
-        users::UpdateUser,
+        users::UserUpdateRequest,
     },
+    dtos::users::{UserResponseDto, UserUpdateDto},
     middlewares,
-    models::users::{UserResponse, UserUpdate},
     repositories::user_repository::{get_user_by_username, update_user},
 };
 
@@ -21,10 +21,10 @@ async fn update(
     user: middlewares::AuthenticatedUser,
     jwt_secret: web::Data<JwtSecret>,
     pool: web::Data<PgPool>,
-    update: web::Json<UserUpdate>,
+    update: web::Json<UserUpdateDto>,
 ) -> HttpResponse {
     // Validate the input
-    let updated_user: UpdateUser = match update.into_inner().try_into() {
+    let updated_user: UserUpdateRequest = match update.into_inner().try_into() {
         Ok(updated_user) => updated_user,
         Err(e) => return validation_error(e.as_ref()),
     };
@@ -41,7 +41,7 @@ async fn update(
                 Ok(user) => {
                     // Generate token and respond
                     match create_jwt_for_user(user.username.as_ref(), &jwt_secret.into_inner().0) {
-                        Ok(token) => HttpResponse::Ok().json(UserResponse::new(
+                        Ok(token) => HttpResponse::Ok().json(UserResponseDto::new(
                             user.username.as_ref(),
                             user.email.as_ref(),
                             user.bio.as_deref(),

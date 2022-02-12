@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 /// The JSON payload model received for a user registration.
 #[derive(Deserialize)]
-pub struct UserRegistration {
+pub struct UserRegistrationDto {
     pub user: UserRegistrationFields,
 }
 

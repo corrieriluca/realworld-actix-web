@@ -1,7 +1,7 @@
 use sha3::{Digest, Sha3_512};
 
 use super::{email::UserEmail, username::Username};
-use crate::models::users::UserRegistration;
+use crate::dtos::users::UserRegistrationDto;
 
 /// This struct represents a valid user input for registration.
 pub struct NewUser {
@@ -10,12 +10,12 @@ pub struct NewUser {
     pub password: String,
 }
 
-impl TryFrom<UserRegistration> for NewUser {
+impl TryFrom<UserRegistrationDto> for NewUser {
     type Error = String;
 
     /// Transforms a [`UserRegistration`] payload to a domain-compliant
     /// [`NewUser`] (valid username, valid email address, hashed password).
-    fn try_from(value: UserRegistration) -> Result<Self, Self::Error> {
+    fn try_from(value: UserRegistrationDto) -> Result<Self, Self::Error> {
         let username = Username::parse(value.user.username)?;
         let email = UserEmail::parse(value.user.email)?;
         if value.user.password.is_empty() {

@@ -5,9 +5,9 @@ use crate::{
     domain::{
         auth::{create_jwt_for_user, JwtSecret},
         error::validation_error,
-        users::LoginUser,
+        users::UserLoginRequest,
     },
-    models::users::{UserLogin, UserResponse},
+    dtos::users::{UserLoginDto, UserResponseDto},
     repositories::user_repository::get_user_with_password_by_email,
 };
 
@@ -17,10 +17,10 @@ use crate::{
 async fn login(
     pool: web::Data<PgPool>,
     jwt_secret: web::Data<JwtSecret>,
-    user: web::Json<UserLogin>,
+    user: web::Json<UserLoginDto>,
 ) -> HttpResponse {
     // Validate the input
-    let login_user: LoginUser = match user.into_inner().try_into() {
+    let login_user: UserLoginRequest = match user.into_inner().try_into() {
         Ok(login_user) => login_user,
         Err(e) => return validation_error(e.as_ref()),
     };
@@ -32,7 +32,7 @@ async fn login(
             if user.password == login_user.password {
                 // Return a JWT token if success
                 match create_jwt_for_user(&user.username, &jwt_secret.into_inner().0) {
-                    Ok(token) => HttpResponse::Ok().json(UserResponse::new(
+                    Ok(token) => HttpResponse::Ok().json(UserResponseDto::new(
                         &user.username,
                         &user.email,
                         user.bio.as_deref(),

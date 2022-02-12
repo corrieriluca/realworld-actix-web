@@ -2,10 +2,26 @@
 
 use sqlx::PgPool;
 
-use crate::{
-    domain::users::{NewUser, UpdateUser},
-    models::users::{User, UserWithPassword},
-};
+use crate::domain::users::{NewUser, UserUpdateRequest};
+
+/// This struct represents an User as stored in the database (without
+/// the table's unique ID and the password).
+pub struct User {
+    pub username: String,
+    pub email: String,
+    pub bio: Option<String>,
+    pub image: Option<String>,
+}
+
+/// This struct represents an User as stored in the database with its hashed
+/// password (without the table's unique ID).
+pub struct UserWithPassword {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+    pub bio: Option<String>,
+    pub image: Option<String>,
+}
 
 /// Inserts a new valid user in the database. If the user already exists in the
 /// database, this operation might fail (same username and/or same email).
@@ -68,7 +84,7 @@ pub async fn get_user_with_password_by_email(
 pub async fn update_user(
     pool: &PgPool,
     username: &str,
-    updated: &UpdateUser,
+    updated: &UserUpdateRequest,
 ) -> Result<String, sqlx::Error> {
     // Generate the `SET ...` string
     let mut properties_to_set = Vec::new();

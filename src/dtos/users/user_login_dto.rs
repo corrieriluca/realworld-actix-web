@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 /// The JSON payload model received for a user login.
 #[derive(Deserialize)]
-pub struct UserLogin {
+pub struct UserLoginDto {
     pub user: UserLoginFields,
 }
 
