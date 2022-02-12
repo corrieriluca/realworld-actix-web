@@ -26,8 +26,8 @@ use futures::{future::LocalBoxFuture, FutureExt};
 use sqlx::PgPool;
 
 use crate::{
-    domain::auth::decode_token,
-    models::{auth::JwtSecret, users::User},
+    domain::auth::{decode_token, JwtSecret},
+    models::users::User,
     repositories::user_repository::get_user_by_username,
 };
 

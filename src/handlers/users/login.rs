@@ -2,11 +2,12 @@ use actix_web::{post, web, HttpResponse};
 use sqlx::PgPool;
 
 use crate::{
-    domain::{auth::create_jwt_for_user, error::validation_error, users::LoginUser},
-    models::{
-        auth::JwtSecret,
-        users::{UserLogin, UserResponse},
+    domain::{
+        auth::{create_jwt_for_user, JwtSecret},
+        error::validation_error,
+        users::LoginUser,
     },
+    models::users::{UserLogin, UserResponse},
     repositories::user_repository::get_user_with_password_by_email,
 };
 

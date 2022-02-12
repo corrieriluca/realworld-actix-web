@@ -2,12 +2,13 @@ use actix_web::{put, web, HttpResponse};
 use sqlx::PgPool;
 
 use crate::{
-    domain::{auth::create_jwt_for_user, error::validation_error, users::UpdateUser},
-    middlewares,
-    models::{
-        auth::JwtSecret,
-        users::{UserResponse, UserUpdate},
+    domain::{
+        auth::{create_jwt_for_user, JwtSecret},
+        error::validation_error,
+        users::UpdateUser,
     },
+    middlewares,
+    models::users::{UserResponse, UserUpdate},
     repositories::user_repository::{get_user_by_username, update_user},
 };
 

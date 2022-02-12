@@ -1,6 +1,39 @@
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+//! This module contains several strutures and functions dealing with
+//! authentication with a JSON Web Token (JWT).
 
-use crate::models::auth::Claims;
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use serde::{Deserialize, Serialize};
+
+/// Just a wrapper around a string that holds a JWT shared secret.
+pub struct JwtSecret(pub String);
+
+/// The structure defining the payload part of a JWT.
+#[derive(Serialize, Deserialize)]
+pub struct Claims {
+    iss: String,
+    sub: String,
+    aud: String,
+    exp: u64,
+    iat: u64,
+}
+
+impl Claims {
+    /// Creates a new Claims structure with the given values as fields.
+    pub fn new(iss: String, sub: String, aud: String, exp: u64, iat: u64) -> Self {
+        Self {
+            iss,
+            sub,
+            aud,
+            exp,
+            iat,
+        }
+    }
+
+    /// Get a reference to the username referenced in this claims (`sub` field).
+    pub fn username(&self) -> &str {
+        self.sub.as_ref()
+    }
+}
 
 /// Create a Claims struct for a new JWT (valid for one hour)
 fn create_claims_from_user(username: &str) -> Claims {
@@ -29,6 +62,7 @@ pub fn create_jwt_for_user(
     )
 }
 
+/// Decode a JWT token into a [`Claims`] struct with the given shared secret.
 pub fn decode_token(
     token: &str,
     shared_secret: &str,
