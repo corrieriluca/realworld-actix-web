@@ -1,6 +1,6 @@
 use actix_web::{get, HttpResponse};
 
-use crate::{middlewares, models::users::UserResponse};
+use crate::{dtos::users::UserResponseDto, middlewares};
 
 /// The `GET /api/user` endpoint. **Requires authentication.**
 /// Return 200 OK with an user response as JSON body.
@@ -8,7 +8,7 @@ use crate::{middlewares, models::users::UserResponse};
 /// a valid authentication.
 #[get("", wrap = "middlewares::Authentication")]
 async fn user_info(user: middlewares::AuthenticatedUser) -> HttpResponse {
-    HttpResponse::Ok().json(UserResponse::new(
+    HttpResponse::Ok().json(UserResponseDto::new(
         &user.user.username,
         &user.user.email,
         user.user.bio.as_deref(),

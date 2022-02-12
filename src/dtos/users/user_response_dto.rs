@@ -3,7 +3,7 @@ use serde::Serialize;
 /// The User API Response format, as described in the spec, encapsulates
 /// user information inside a `user` field.
 #[derive(Serialize)]
-pub struct UserResponse<'a> {
+pub struct UserResponseDto<'a> {
     user: UserResponseFields<'a>,
 }
 
@@ -19,7 +19,7 @@ struct UserResponseFields<'a> {
     token: &'a str,
 }
 
-impl<'a> UserResponse<'a> {
+impl<'a> UserResponseDto<'a> {
     /// Constructs a new [`UserResponse`] with the given values for the fields
     /// of the [`UserResponseFields`] strcture.
     pub fn new(

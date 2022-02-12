@@ -1,10 +1,10 @@
 use sha3::{Digest, Sha3_512};
 
 use super::{email::UserEmail, username::Username};
-use crate::models::users::UserUpdate;
+use crate::dtos::users::UserUpdateDto;
 
 /// This struct represents a valid user input for registration.
-pub struct UpdateUser {
+pub struct UserUpdateRequest {
     pub username: Option<Username>,
     pub email: Option<UserEmail>,
     pub password: Option<String>,
@@ -12,7 +12,7 @@ pub struct UpdateUser {
     pub image: Option<String>,
 }
 
-impl UpdateUser {
+impl UserUpdateRequest {
     /// Returns true if all the fields of the struct are [`None`] variant.
     pub fn is_all_none(&self) -> bool {
         self.username.is_none()
@@ -23,13 +23,13 @@ impl UpdateUser {
     }
 }
 
-impl TryFrom<UserUpdate> for UpdateUser {
+impl TryFrom<UserUpdateDto> for UserUpdateRequest {
     type Error = String;
 
     /// Transforms a [`UserUpdate`] payload to a domain-compliant
     /// [`UpdateUser`] (valid username, valid email address, hashed password,
     /// valid bio and image).
-    fn try_from(value: UserUpdate) -> Result<Self, Self::Error> {
+    fn try_from(value: UserUpdateDto) -> Result<Self, Self::Error> {
         let mut username = None;
         if let Some(uname) = value.user.username {
             username = Some(Username::parse(uname)?);
@@ -67,7 +67,7 @@ impl TryFrom<UserUpdate> for UpdateUser {
             }
         }
 
-        Ok(UpdateUser {
+        Ok(UserUpdateRequest {
             username,
             email,
             password,
