@@ -13,9 +13,8 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::{
     configuration::{DatabaseSettings, Settings},
-    domain::error::validation_error,
+    domain::{auth::JwtSecret, error::validation_error},
     handlers,
-    models::auth::JwtSecret,
 };
 
 /// This structure mainly holds the server ready to serve requests, as well as
