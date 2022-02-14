@@ -71,6 +71,19 @@
       ]
     }
   },
+  "7ae0b65cdf0e1570d58c982df86484dfc5e59f632bdadb74f1ec5c63cd3c3994": {
+    "query": "\n        INSERT INTO followers (follower, followed)\n        VALUES ($1, $2)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "a4cde3ed56b1487a9dcf70cd83f7cfd5d453beedb3c74f831d25232f294e87e0": {
     "query": "\n        INSERT INTO users (username, email, password)\n        VALUES ($1, $2, $3)\n        ",
     "describe": {
