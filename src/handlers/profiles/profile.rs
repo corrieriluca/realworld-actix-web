@@ -34,7 +34,7 @@ async fn get_profile(
             None,
         )),
         // Authenticated, check if following
-        Some(u) => match is_following(&pool, &u.user.username, &profile.username).await {
+        Some(u) => match is_following(&pool, &u.user.username, &username).await {
             Ok(following) => HttpResponse::Ok().json(ProfileResponseDto::new(
                 &profile.username,
                 profile.bio.as_deref(),

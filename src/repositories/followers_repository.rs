@@ -24,3 +24,19 @@ pub async fn is_following(pool: &PgPool, user1: &str, user2: &str) -> Result<boo
         },
     }
 }
+
+/// Make follow `user2` by `user1`.
+pub async fn follow(pool: &PgPool, user1: &str, user2: &str) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        INSERT INTO followers (follower, followed)
+        VALUES ($1, $2)
+        "#,
+        user1,
+        user2
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
