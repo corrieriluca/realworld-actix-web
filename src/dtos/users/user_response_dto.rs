@@ -20,7 +20,7 @@ struct UserResponseFields<'a> {
 }
 
 impl<'a> UserResponseDto<'a> {
-    /// Constructs a new [`UserResponse`] with the given values for the fields
+    /// Constructs a new [`UserResponseDto`] with the given values for the fields
     /// of the [`UserResponseFields`] strcture.
     pub fn new(
         username: &'a str,
