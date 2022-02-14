@@ -2,4 +2,4 @@
 
 pub mod auth;
 
-pub use auth::{AuthenticatedUser, Authentication};
+pub use auth::{AuthenticatedUser, AuthenticationMiddlewareFactory, MaybeAuthenticatedUser};

@@ -16,7 +16,7 @@ use crate::{
 /// Return 200 OK with an user response as JSON body.
 /// Return 401 Unauthorized (by the authentication middleware) if there is not
 /// a valid authentication.
-#[put("", wrap = "middlewares::Authentication")]
+#[put("")]
 async fn update(
     user: middlewares::AuthenticatedUser,
     jwt_secret: web::Data<JwtSecret>,

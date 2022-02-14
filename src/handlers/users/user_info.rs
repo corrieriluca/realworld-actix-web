@@ -6,7 +6,7 @@ use crate::{dtos::users::UserResponseDto, middlewares};
 /// Return 200 OK with an user response as JSON body.
 /// Return 401 Unauthorized (by the authentication middleware) if there is not
 /// a valid authentication.
-#[get("", wrap = "middlewares::Authentication")]
+#[get("")]
 async fn user_info(user: middlewares::AuthenticatedUser) -> HttpResponse {
     HttpResponse::Ok().json(UserResponseDto::new(
         &user.user.username,
