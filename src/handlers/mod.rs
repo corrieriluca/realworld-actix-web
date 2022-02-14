@@ -4,6 +4,7 @@
 use actix_web::web;
 
 pub mod health_check;
+pub mod profiles;
 pub mod users;
 
 /// Configure the services for Conduit, not including the `/api`
@@ -13,4 +14,5 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(health_check::health_check);
     cfg.service(web::scope("/users").configure(users::config_users));
     cfg.service(web::scope("/user").configure(users::config_user));
+    cfg.service(web::scope("/profiles").configure(profiles::config_profiles));
 }

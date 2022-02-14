@@ -1,4 +1,4 @@
-//! The Users request handlers are responsible for handling CRU* actions on the
+//! The Users request handlers are responsible for handling CRU_ actions on the
 //! users:
 //! - Create new users with registration (`POST /api/users`) with the
 //!   `register` module ;
