@@ -174,6 +174,13 @@ impl std::ops::Deref for AuthenticatedUser {
 /// optional authentication). Does not throw 401 error.
 pub struct MaybeAuthenticatedUser(Option<AuthenticationInfo>);
 
+impl MaybeAuthenticatedUser {
+    /// Get the inner [`Option<AuthenticationInfo>`].
+    pub fn inner(&self) -> &Option<AuthenticationInfo> {
+        &self.0
+    }
+}
+
 impl FromRequest for MaybeAuthenticatedUser {
     type Error = Error;
     type Future = Ready<Result<Self, Self::Error>>;
@@ -181,13 +188,5 @@ impl FromRequest for MaybeAuthenticatedUser {
     fn from_request(req: &actix_web::HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
         let value = req.extensions().get::<AuthenticationInfo>().cloned();
         ready(Ok(MaybeAuthenticatedUser(value)))
-    }
-}
-
-impl std::ops::Deref for MaybeAuthenticatedUser {
-    type Target = Option<AuthenticationInfo>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
