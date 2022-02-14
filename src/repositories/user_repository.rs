@@ -1,4 +1,4 @@
-//! This module interacts primarily with the "users" database.
+//! This module interacts primarily with the "users" table.
 
 use sqlx::PgPool;
 
