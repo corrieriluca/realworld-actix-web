@@ -14,7 +14,7 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 use crate::{
     configuration::{DatabaseSettings, Settings},
     domain::{auth::JwtSecret, error::validation_error},
-    handlers,
+    handlers, middlewares,
 };
 
 /// This structure mainly holds the server ready to serve requests, as well as
@@ -83,6 +83,7 @@ fn build_server(
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
+            .wrap(middlewares::AuthenticationMiddlewareFactory)
             .service(web::scope("/api").configure(handlers::config))
             .app_data(json_cfg.clone())
             .app_data(db_pool.clone())

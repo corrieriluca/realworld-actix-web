@@ -1,8 +1,12 @@
-//! Module that contains the [`Authentication`] middleware.
+//! Module that contains the Authentication middleware.
 //!
-//! The [`Authentication`] middleware is responsible for granting access to
+//! The Authentication middleware is responsible for granting access to
 //! certain resources based on the JWT token passed in the Authorization header
 //! of a incoming request.
+//!
+//! The Authentication middleware does **not** throw error in case of failed
+//! authentication. This task is handled by request extractors like
+//! [`AuthenticatedUser`] and [`MaybeAuthenticatedUser`].
 //!
 //! The incoming request's Authorization header must be of the form:
 //! ```text
@@ -12,12 +16,11 @@
 
 use std::{
     future::{ready, Ready},
-    ops::Deref,
     rc::Rc,
 };
 
 use actix_web::{
-    dev::{Service, ServiceRequest, ServiceResponse, Transform},
+    dev::{self, Service, ServiceRequest, ServiceResponse, Transform},
     error::{ErrorInternalServerError, ErrorUnauthorized},
     web::Data,
     Error, FromRequest, HttpMessage,
@@ -30,25 +33,10 @@ use crate::{
     repositories::user_repository::{get_user_by_username, User},
 };
 
-/// Struct for registering the authentication middleware.
-pub struct Authentication;
+/// Struct for registering the authentication middleware (middleware factory).
+pub struct AuthenticationMiddlewareFactory;
 
-/// Structure that holds the information of a succeeded authentication.
-type AuthenticationInfo = Rc<AuthenticationResult>;
-
-pub struct AuthenticationResult {
-    /// The valid JWT token attached to this authentication.
-    pub token: String,
-    /// The user that is authentified.
-    pub user: User,
-}
-
-/// The implementation of the authentication middleware
-pub struct AuthenticationMiddleware<S> {
-    service: Rc<S>,
-}
-
-impl<S, B> Transform<S, ServiceRequest> for Authentication
+impl<S, B> Transform<S, ServiceRequest> for AuthenticationMiddlewareFactory
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
@@ -67,6 +55,21 @@ where
     }
 }
 
+/// The implementation of the authentication middleware
+pub struct AuthenticationMiddleware<S> {
+    service: Rc<S>,
+}
+
+/// Structure that holds the information of a succeeded authentication.
+type AuthenticationInfo = Rc<AuthenticationResult>;
+
+pub struct AuthenticationResult {
+    /// The valid JWT token attached to this authentication.
+    pub token: String,
+    /// The user that is authentified.
+    pub user: User,
+}
+
 impl<S, B> Service<ServiceRequest> for AuthenticationMiddleware<S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
@@ -77,12 +80,7 @@ where
     type Error = Error;
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
-    fn poll_ready(
-        &self,
-        ctx: &mut core::task::Context<'_>,
-    ) -> std::task::Poll<Result<(), Self::Error>> {
-        self.service.poll_ready(ctx)
-    }
+    dev::forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         // Clone the Rc pointer so we can move it into the async block
@@ -99,42 +97,31 @@ where
                 (Some(p), Some(j)) => (p, j),
                 _ => {
                     return Err(ErrorInternalServerError(
-                        "Cannot access to internal resources.",
+                        "Auth middleware: Cannot access to internal resources.",
                     ))
                 },
             };
 
             // 2. Extract the token from the request's Authorization header
-            let token = match req.headers().get("Authorization") {
+            let token: Option<String> = match req.headers().get("Authorization") {
                 Some(auth_header) => match auth_header.to_str() {
-                    Ok(auth_header) => match auth_header.strip_prefix("Token") {
-                        Some(token) => token.trim().to_owned(),
-                        None => {
-                            return Err(ErrorUnauthorized(
-                                "Invalid format for Authorization header.",
-                            ))
-                        },
-                    },
-                    Err(_) => {
-                        return Err(ErrorUnauthorized(
-                            "Invalid format for Authorization header.",
-                        ))
-                    },
+                    Ok(auth_header) => auth_header
+                        .strip_prefix("Token")
+                        .map(|token| token.trim().to_owned()),
+                    _ => None,
                 },
-                None => return Err(ErrorUnauthorized("No Authorization header found.")),
+                _ => None,
             };
 
-            // 3. Decode the token and associate an user to it
-            match decode_token(&token, &jwt_secret.0) {
-                Ok(claims) => match get_user_by_username(pool, claims.username()).await {
-                    Ok(user) => {
+            // 3. If a token is found, decode the token and associate an user to it
+            if let Some(token) = token {
+                if let Ok(claims) = decode_token(&token, &jwt_secret.0) {
+                    if let Ok(user) = get_user_by_username(pool, claims.username()).await {
                         req.extensions_mut().insert::<AuthenticationInfo>(Rc::new(
                             AuthenticationResult { token, user },
                         ));
-                    },
-                    Err(_) => return Err(ErrorUnauthorized("Invalid token.")),
-                },
-                Err(_) => return Err(ErrorUnauthorized("Invalid token.")),
+                    }
+                }
             }
 
             // Call the next service
@@ -150,10 +137,9 @@ where
 }
 
 /// Request extractor that extracts an authentication result from the request's
-/// extensions. This extractor **must** be used in conjunction with the
-/// [`Authentication`] middleware as it extracts the [`AuthenticationInfo`] in
-/// the request's extensions. Otherwise it will result in an Unauthorized error
-/// (header not present).
+/// extensions. This extractor must be used in conjunction with
+/// [`AuthenticationMiddleware`]. The authentication must succeed otherwise it
+/// will result in an Unauthorized error (401).
 pub struct AuthenticatedUser(AuthenticationInfo);
 
 impl FromRequest for AuthenticatedUser {
@@ -167,11 +153,7 @@ impl FromRequest for AuthenticatedUser {
         let value = req.extensions().get::<AuthenticationInfo>().cloned();
         let result = match value {
             Some(v) => Ok(AuthenticatedUser(v)),
-            // Usually None is returned is the authentication middleware has not
-            // been used.
-            None => Err(ErrorUnauthorized(
-                "You must provide an Authorization header.",
-            )),
+            None => Err(ErrorUnauthorized("You're not authenticated.")),
         };
 
         ready(result)
@@ -180,8 +162,30 @@ impl FromRequest for AuthenticatedUser {
 
 /// Implements Deref trait for easier retrieving of the inner type of
 /// [`AuthenticationInfo`].
-impl Deref for AuthenticatedUser {
+impl std::ops::Deref for AuthenticatedUser {
     type Target = AuthenticationInfo;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+/// Request extractor for handlers that **may** require authentication (i.e.
+/// optional authentication). Does not throw 401 error.
+pub struct MaybeAuthenticatedUser(Option<AuthenticationInfo>);
+
+impl FromRequest for MaybeAuthenticatedUser {
+    type Error = Error;
+    type Future = Ready<Result<Self, Self::Error>>;
+
+    fn from_request(req: &actix_web::HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
+        let value = req.extensions().get::<AuthenticationInfo>().cloned();
+        ready(Ok(MaybeAuthenticatedUser(value)))
+    }
+}
+
+impl std::ops::Deref for MaybeAuthenticatedUser {
+    type Target = Option<AuthenticationInfo>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
