@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub(crate) struct TestApp {
     address: String,
     db_pool: PgPool,
+    jwt_secret: String,
 }
 
 impl TestApp {
@@ -21,6 +22,11 @@ impl TestApp {
     /// Get a reference to the test app's DB pool.
     pub(crate) fn db_pool(&self) -> &PgPool {
         &self.db_pool
+    }
+
+    /// Get a reference to the test app's jwt secret.
+    pub(crate) fn jwt_secret(&self) -> &str {
+        self.jwt_secret.as_ref()
     }
 }
 
@@ -52,6 +58,7 @@ pub(crate) async fn spawn_app() -> TestApp {
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
         db_pool: get_connection_pool(&configuration.database),
+        jwt_secret: configuration.app.jwt_secret,
     }
 }
 
