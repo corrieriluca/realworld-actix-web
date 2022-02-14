@@ -1,5 +1,32 @@
 {
   "db": "PostgreSQL",
+  "19683ba279654b06dbb8a6f82cc6989c6e335aa8a3cb77034cfeedf849b3f2ed": {
+    "query": "\n        SELECT *\n        FROM followers\n        WHERE follower = $1\n            AND followed = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "follower",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "followed",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "765e8797484768d56c4b52c3322cc9a112eb5d88ac3c465c25336f6d73268d0e": {
     "query": "\n        SELECT username, email, password, bio, image\n        FROM users\n        WHERE email = $1\n        ",
     "describe": {
