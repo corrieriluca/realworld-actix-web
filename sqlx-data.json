@@ -27,6 +27,19 @@
       ]
     }
   },
+  "2a600633196f572487ebb6f6c73d1c3cc5557e00fecb51e19916e6cb098048ee": {
+    "query": "\n        DELETE FROM followers\n        WHERE follower = $1\n            AND followed = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "765e8797484768d56c4b52c3322cc9a112eb5d88ac3c465c25336f6d73268d0e": {
     "query": "\n        SELECT username, email, password, bio, image\n        FROM users\n        WHERE email = $1\n        ",
     "describe": {

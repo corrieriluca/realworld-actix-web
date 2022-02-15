@@ -1,21 +1,22 @@
 use std::ops::Deref;
 
-use actix_web::{post, web, HttpResponse};
+use actix_web::{delete, web, HttpResponse};
 use sqlx::PgPool;
 
 use crate::{
     domain::error::{validation_error, ErrorResponse},
     dtos::profiles::profile_response_dto::ProfileResponseDto,
     middlewares,
-    repositories::{followers_repository::follow, user_repository::get_user_by_username},
+    repositories::{followers_repository::unfollow, user_repository::get_user_by_username},
 };
 
-/// The `POST /api/profiles/:username/follow` endpoint.
-/// Returns 200 with the followed profile upon success.
+/// The `DELETE /api/profiles/:username/follow` endpoint.
+/// Returns 200 with the unfollowed profile upon success.
 /// Returns 404 if the user to follow is not found.
-/// Returns 422 in other cases (self-following/already-following).
-#[post("/{username}/follow")]
-async fn follow_user(
+/// Returns 422 in other cases (self-unfollowing).
+/// Unfollowing an user you're not following does not trigger an error.
+#[delete("/{username}/follow")]
+async fn unfollow_user(
     pool: web::Data<PgPool>,
     username: web::Path<String>,
     user: middlewares::AuthenticatedUser,
@@ -28,19 +29,19 @@ async fn follow_user(
 
     // Check the users are different
     if username.deref() == &user.user.username {
-        return validation_error("Cannot follow yourself!");
+        return validation_error("Cannot unfollow yourself!");
     }
 
-    match follow(&pool, &user.user.username, &username).await {
+    match unfollow(&pool, &user.user.username, &username).await {
         Ok(_) => HttpResponse::Ok().json(ProfileResponseDto::new(
             &username,
             profile.bio.as_deref(),
             profile.image.as_deref(),
-            Some(true),
+            Some(false),
         )),
         Err(e) => match e {
             sqlx::Error::Database(_) => {
-                validation_error("Unable to follow. You might already follow this user.")
+                validation_error("Unable to unfollow. You may not already be following this user.")
             },
             _ => HttpResponse::InternalServerError().body("Unexpected error happened."),
         },

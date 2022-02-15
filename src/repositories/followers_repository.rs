@@ -40,3 +40,20 @@ pub async fn follow(pool: &PgPool, user1: &str, user2: &str) -> Result<(), sqlx:
 
     Ok(())
 }
+
+/// Make unfollow `user2` by `user1`.
+pub async fn unfollow(pool: &PgPool, user1: &str, user2: &str) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        DELETE FROM followers
+        WHERE follower = $1
+            AND followed = $2
+        "#,
+        user1,
+        user2
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
