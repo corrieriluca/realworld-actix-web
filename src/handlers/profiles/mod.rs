@@ -11,10 +11,11 @@ use actix_web::web;
 
 pub mod follow;
 pub mod profile;
-// pub mod unfollow;
+pub mod unfollow;
 
 /// Configure the Profiles service (`/api/profiles/...` endpoints).
 pub fn config_profiles(cfg: &mut web::ServiceConfig) {
     cfg.service(profile::get_profile);
     cfg.service(follow::follow_user);
+    cfg.service(unfollow::unfollow_user);
 }
