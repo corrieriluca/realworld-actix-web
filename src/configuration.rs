@@ -69,10 +69,10 @@ impl DatabaseSettings {
 /// For example `CONDUIT_DATABASE__PASSWORD=password` would set the
 /// `AppSettings.database.password` field.
 pub fn read_configuration() -> Result<Settings, config::ConfigError> {
-    let mut settings = config::Config::default();
-    settings
-        .merge(config::File::with_name("configuration"))?
-        .merge(config::Environment::with_prefix("CONDUIT").separator("__"))?;
+    let settings = config::Config::builder()
+        .add_source(config::File::with_name("configuration"))
+        .add_source(config::Environment::with_prefix("CONDUIT").separator("__"))
+        .build()?;
 
-    settings.try_into()
+    settings.try_deserialize()
 }
