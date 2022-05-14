@@ -1,11 +1,8 @@
 app:
-  host: "127.0.0.1"
   port: 8080
-  jwt_secret: "2DgSjrVwFXLYFz" # change this!
 database:
   host: "127.0.0.1"
   port: 5432
   username: "postgres"
   password: "password"
   database_name: "conduit"
-  ssl: false
