@@ -23,9 +23,11 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+        options: >-
+          --entrypoint="postgres -N 1000"
     env:
-      SQLX_VERSION: 0.5.9
-      SQLX_FEATURES: postgres
+      SQLX_VERSION: 0.5.13
+      SQLX_FEATURES: rustls,postgres
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
@@ -94,9 +96,11 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+        options: >-
+          --entrypoint="postgres -N 1000"
     env:
-      SQLX_VERSION: 0.5.9
-      SQLX_FEATURES: postgres
+      SQLX_VERSION: 0.5.13
+      SQLX_FEATURES: rustls,postgres
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
