@@ -1,10 +1,9 @@
 use conduit::{
     configuration::{read_configuration, DatabaseSettings},
-    startup::get_connection_pool,
     Application,
 };
 use fake::{Fake, StringFaker};
-use sqlx::{Connection, Executor, PgConnection, PgPool};
+use sqlx::{postgres::PgPoolOptions, Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 
 pub(crate) struct TestApp {
@@ -57,7 +56,7 @@ pub(crate) async fn spawn_app() -> TestApp {
 
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
-        db_pool: get_connection_pool(&configuration.database),
+        db_pool: get_test_connection_pool(&configuration.database),
         jwt_secret: configuration.app.jwt_secret,
     }
 }
@@ -83,4 +82,13 @@ async fn configure_database(config: &DatabaseSettings) {
         .run(&connection_pool)
         .await
         .expect("Failed to run migrations on the database");
+}
+
+/// Get a connection pool to the database specified in the given settings.
+/// It differs from [`get_connection_pool`] in that it increases the connection
+/// timeout to a value of 10 seconds.
+fn get_test_connection_pool(configuration: &DatabaseSettings) -> PgPool {
+    PgPoolOptions::new()
+        .connect_timeout(std::time::Duration::from_secs(10))
+        .connect_lazy_with(configuration.with_db())
 }
