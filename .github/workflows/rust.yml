@@ -21,14 +21,37 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --name postgres_container
         ports:
           - 5432:5432
     env:
       SQLX_VERSION: 0.5.13
       SQLX_FEATURES: rustls,postgres
+      PGHOST: localhost
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: password
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
+
+      - name: Increase DB Max Connection
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+          psql -c 'SELECT VERSION();'
+          psql -c 'SHOW config_file;'
+          docker exec -i postgres_container bash << EOF
+            sed -i -e 's/max_connections = 100/max_connections = 1000/' /var/lib/postgresql/data/postgresql.conf
+          EOF
+          docker restart --time 0 postgres_container
+          sleep 5
+          psql -c 'SHOW max_connections;'
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -81,7 +104,6 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: -- --test-threads=1
 
   coverage:
     name: Coverage
@@ -93,14 +115,36 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --name postgres_container
         ports:
           - 5432:5432
     env:
       SQLX_VERSION: 0.5.13
       SQLX_FEATURES: rustls,postgres
+      PGHOST: localhost
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: password
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
+      - name: Increase DB Max Connection
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+          psql -c 'SELECT VERSION();'
+          psql -c 'SHOW config_file;'
+          docker exec -i postgres_container bash << EOF
+            sed -i -e 's/max_connections = 100/max_connections = 1000/' /var/lib/postgresql/data/postgresql.conf
+          EOF
+          docker restart --time 0 postgres_container
+          sleep 5
+          psql -c 'SHOW max_connections;'
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -139,7 +183,7 @@ jobs:
       - name: Run cargo tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
-          args: '--ignore-tests --avoid-cfg-tarpaulin -- --test-threads=1'
+          args: '--ignore-tests --avoid-cfg-tarpaulin'
 
       - name: Codecov upload
         uses: codecov/codecov-action@v2
