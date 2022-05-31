@@ -23,8 +23,6 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
-        options: >-
-          --entrypoint="postgres -N 1000"
     env:
       SQLX_VERSION: 0.5.13
       SQLX_FEATURES: rustls,postgres
@@ -49,7 +47,7 @@ jobs:
           path: |
             ~/.cargo/bin/sqlx
             ~/.cargo/bin/cargo-sqlx
-          key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}-${{ env.SQLX_FEATURES }}
+          key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}-postgres
 
       - name: Install sqlx-cli
         uses: actions-rs/cargo@v1
@@ -83,6 +81,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: -- --test-threads=1
 
   coverage:
     name: Coverage
@@ -96,8 +95,6 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
-        options: >-
-          --entrypoint="postgres -N 1000"
     env:
       SQLX_VERSION: 0.5.13
       SQLX_FEATURES: rustls,postgres
@@ -119,7 +116,7 @@ jobs:
           path: |
             ~/.cargo/bin/sqlx
             ~/.cargo/bin/cargo-sqlx
-          key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}-${{ env.SQLX_FEATURES }}
+          key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}-postgres
 
       - name: Install sqlx-cli
         uses: actions-rs/cargo@v1
@@ -142,7 +139,7 @@ jobs:
       - name: Run cargo tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
-          args: '--ignore-tests --avoid-cfg-tarpaulin'
+          args: '--ignore-tests --avoid-cfg-tarpaulin -- --test-threads=1'
 
       - name: Codecov upload
         uses: codecov/codecov-action@v2
