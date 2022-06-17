@@ -1,4 +1,4 @@
-FROM rust:1.60 as builder
+FROM rust:1.61 as builder
 ENV CARGO_INSTALL_ROOT /usr
 RUN cargo install sqlx-cli --no-default-features --features rustls,postgres --version 0.5.13 --locked
 
