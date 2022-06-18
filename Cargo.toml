@@ -18,10 +18,10 @@ name = "conduit"
 [dependencies]
 actix-web = "4.0.1"
 sqlx = { version = "0.5.13", features = [
-    "runtime-actix-rustls",
-    "macros",
-    "postgres",
-    "offline",
+  "runtime-actix-rustls",
+  "macros",
+  "postgres",
+  "offline",
 ] }
 
 config = { version = "0.13.1", features = ["yaml"], default-features = false }

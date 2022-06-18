@@ -26,10 +26,11 @@ For more information on how to this works with other frontends/backends, head ov
     - [🧪 Run Tests](#-run-tests)
   - [📦 With Docker Compose](#-with-docker-compose)
 - [How does it work?](#how-does-it-work)
-  - [Configuration files](#configuration-files)
-  - [Authentication middleware](#authentication-middleware)
-  - [Code architecture](#code-architecture)
-- [Resources](#resources)
+  - [⚙️ Configuration files](#️-configuration-files)
+  - [🔑 Authentication middleware](#-authentication-middleware)
+  - [🏛 Code architecture](#-code-architecture)
+  - [🧪 Functional Tests (API)](#-functional-tests-api)
+- [Resources & Bibliography](#resources--bibliography)
 
 # Introduction
 
@@ -104,10 +105,72 @@ The API will be exposed on port 8080, you can run your own tests with tools such
 
 # How does it work?
 
-## Configuration files
+## ⚙️ Configuration files
 
-## Authentication middleware
+The [`config`](https://crates.io/crates/config) crate is used to provide a convenient **layered configuration system** (satisfies [the third of the 12-factor](https://12factor.net/config)).
 
-## Code architecture
+The config files are written in YAML and are placed under the [`configuration`](./configuration/) folder in the same directory as the app.
 
-# Resources
+You can see an example of layers with the `base.yml` file which contains a default listening port and credentials for the database, and the `local.yml` and `production.yml` that overrides some settings from the base as well as adding others (such as the listening address).
+
+Config values can also be overriden with **environment variables** (highest precedence) following this naming convention: `CONDUIT__<settings-category>__<setting>`.
+
+**Example:** override the DB hostname with `CONDUIT__DATABASE__HOST`.
+
+## 🔑 Authentication middleware
+
+Almost all API endpoints require authentication (see [RealWorld backend specs](https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints)) with a JWT token.
+
+This implementation thus makes use of the [`jsonwebtoken`](https://crates.io/crates/jsonwebtoken) crate coupled with a custom authentication middleware that wraps endpoints which need authentication and validate (or reject) requests before they arrive to the endpoint (adding authenticated user information on top of the request).
+
+Please take a look at the [`auth.rs`](./src/middlewares/auth.rs) source file if you want to know more about the implementation of the middleware, code is documented.
+
+## 🏛 Code architecture
+
+The source code of this implementation resides in the [`src`](./src/) directory:
+
+```
+src
+├── domain
+│   └── ...
+├── dtos
+│   └── ...
+├── handlers
+│   └── ...
+├── middlewares
+│   ├── auth.rs
+│   └── mod.rs
+├── repositories
+│   └── ...
+├── configuration.rs
+├── lib.rs
+├── main.rs
+└── startup.rs
+```
+
+The `conduit` library is exposed through the `lib.rs` file.
+
+The `main.rs` source file use the `configuration` and `startup` modules to respectively configure and run the application on the desired listening address and port.
+
+The `middlewares` module contains middlewares such as the Authentication middleware described above.
+
+The `repositories` module contains exposed functions doing SQL queries to the database.
+
+The `dtos` module contains Data Transfer Objects (DTOs) for defining input and output types (as `struct`) of the API.
+
+The `domain` module contains functions and modules dealing with business logic (input validation, JWT tokens...) for the API.
+
+Finally, the `handlers` module contains functions and modules for the **handlers**: the functions mapped to API endpoints. These handlers use the `dtos`, `domain` and `repositories` modules for their internal logic.
+
+## 🧪 Functional Tests (API)
+
+Under the [`tests`](./tests/) folder, you will find all the functional tests of the application, this means API tests.
+
+Especially, the [`reqwest`](https://crates.io/crates/reqwest), [`claim`](https://crates.io/crates/claim) and [`tokio`](https://tokio.rs/) crates are used for HTTP requests, assert functions and background tasks (e.g.: running a test server) respectively.
+
+Before each test, a database with a random name is created, SQLx migrations are runned against it and an API server is launched in background on a random port (this is called a `TestApp` within the code). The details are in the `helpers.rs` source file.
+
+# Resources & Bibliography
+
+- [Demystifying Actix Web Middleware - Daniel Imfeld](https://imfeld.dev/writing/actix-web-middleware)
+- [Zero To Production In Rust - Luca Palmieri](https://www.zero2prod.com/)
