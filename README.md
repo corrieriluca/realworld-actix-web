@@ -172,5 +172,6 @@ Before each test, a database with a random name is created, SQLx migrations are 
 
 # Resources & Bibliography
 
-- [Demystifying Actix Web Middleware - Daniel Imfeld](https://imfeld.dev/writing/actix-web-middleware)
-- [Zero To Production In Rust - Luca Palmieri](https://www.zero2prod.com/)
+- [Zero To Production In Rust](https://www.zero2prod.com/) and [A learning journal](https://www.lpalmieri.com/) from [Luca Palmieri](https://github.com/LukeMathWalker), really helped me to catch good practices on Rust Web dev tooling (such as Actix, SQLx...).
+- [Demystifying Actix Web Middleware - Daniel Imfeld](https://imfeld.dev/writing/actix-web-middleware), helped me to write the Authentication middleware with the last version of Actix (v4).
+- [Actix website](https://actix.rs/) and its crate [documentation](https://docs.rs/actix-web/latest/actix_web/).
