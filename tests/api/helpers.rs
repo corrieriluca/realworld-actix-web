@@ -89,6 +89,6 @@ async fn configure_database(config: &DatabaseSettings) {
 /// timeout to a value of 10 seconds.
 fn get_test_connection_pool(configuration: &DatabaseSettings) -> PgPool {
     PgPoolOptions::new()
-        .connect_timeout(std::time::Duration::from_secs(10))
+        .acquire_timeout(std::time::Duration::from_secs(10))
         .connect_lazy_with(configuration.with_db())
 }

@@ -16,8 +16,8 @@ path = "src/main.rs"
 name = "conduit"
 
 [dependencies]
-actix-web = "4.0.1"
-sqlx = { version = "0.5.13", features = [
+actix-web = "4.1.0"
+sqlx = { version = "0.6.0", features = [
   "runtime-actix-rustls",
   "macros",
   "postgres",
@@ -32,18 +32,18 @@ log = "0.4.17"
 serde = "1.0.137"
 serde-aux = "3.0.1"
 sha3 = "0.10.1"
-jsonwebtoken = "8.1.0"
+jsonwebtoken = "8.1.1"
 validator = "0.15.0"
 time = "0.3.9"
 
 [dev-dependencies]
 actix-rt = "2.7.0"
 claim = "0.5.0"
-fake = "2.4.3"
-reqwest = "0.11.10"
+fake = "2.5.0"
+reqwest = "0.11.11"
 serde_json = "1.0.81"
-tokio = "1.18.2"
-uuid = { version = "1.0.0", features = ["v4", "fast-rng"] }
+tokio = "1.19.2"
+uuid = { version = "1.1.2", features = ["v4", "fast-rng"] }
 
 [profile.dev]
 # Disabling debug info speeds up builds a bunch,
